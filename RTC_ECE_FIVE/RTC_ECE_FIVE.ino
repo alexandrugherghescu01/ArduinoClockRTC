@@ -1,3 +1,10 @@
+#include <Wire.h>                   // for I2C communication
+#include <LiquidCrystal_I2C.h>      // for LCD
+#include <RTClib.h>                 // for RTC
+
+LiquidCrystal_I2C lcd(0x27, 16, 2); // create LCD with I2C address 0x27, 16 characters per line, 2 lines
+RTC_DS3231 rtc;                     // create rtc for the DS3231 RTC module, address is fixed at 0x68
+
 void setup()
 {
   // Setup Serial connection
