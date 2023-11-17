@@ -13,6 +13,8 @@ LiquidCrystal lcd(RSPin, EPin, modePin, upPin, downPin, nextPin);
 uRTCLib rtc(0x68);
 
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+String modes[3] = {"Time", "SetTime", "SetAlarm"};
+int index = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -57,11 +59,16 @@ void loop() {
 
   int val = digitalRead(modePin);
   if (val == HIGH) {
-    Serial.print(1); // test
-    setTime();
-    
+      index++;
+      Serial.print(1); // test
   } else {
       Serial.print(0); 
+   }
+
+   if (modes[index] == "SetTime") {
+      setTime();
+   } else if (modes[index] == "SetAlarm") {
+      // set alarm
    }
   
   delay(100);
@@ -111,3 +118,7 @@ void setTime() {
     // display on LCD
   }
 } 
+
+void setAlarm() {
+   
+}
