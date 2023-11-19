@@ -14,15 +14,46 @@ uint8_t alarmHour, alarmMin, alarmSec; // Time for the Alarm
 
 void setup() {
   URTCLIB_WIRE.begin();
-  rtc.set(00, 30, 2, 7, 19, 11, 23);
+  rtc.set(0, 30, 2, 7, 19, 11, 23);
 
   lcd.begin(16, 2);
 }
 
 void loop() {
   if (digitalRead(modeButton) == HIGH) {
+
+    uint8_t newHr = 0, newMin = 0, newSec = 0; // SetAlarm
+
     lcd.clear();
-    digitalWrite(modeButton, LOW);
+    lcd.setCursor(0, 0);
+    lcd.print("New Time: ");
+
+    // lcd.setCursor(0, 1);
+    // if (newHr < 10) {
+    //   lcd.print(0);
+    //   lcd.print(newHr);
+    // } else {
+    //   lcd.print(newHr);
+    // }
+    // lcd.print(':');
+
+    // if (newMin < 10) {
+    //   lcd.print(0);
+    //   lcd.print(newMin);
+    // } else {
+    //   lcd.print(newMin);
+    // }
+    // lcd.print(':');
+
+    // if (newSec < 10) {
+    //   lcd.print(0);
+    //   lcd.print(newSec);
+    // } else {
+    //   lcd.print(newSec);
+    // }
+    // delay(50000); // 10 seconds to change
+    // lcd.clear();
+    // digitalWrite(modeButton, LOW);
   } else {
     displayTime();
     delay(1000);
