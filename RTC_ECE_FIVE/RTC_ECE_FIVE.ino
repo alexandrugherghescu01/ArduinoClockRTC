@@ -5,7 +5,7 @@
 // Include libraries
 
 const int RSPin = 1, EPin = 2, d4 = 4, d5 = 5, d6 = 6, d7 = 7; // LCD pins
-const int modeButton = 8; // button pins
+const int modeButton = 8, upButton = 9, downButton = 10; // button pins
 
 LiquidCrystal lcd(RSPin, EPin, d4, d5, d6, d7); // Initialize LCD
 uRTCLib rtc(0x68); // Initialize RTC
@@ -14,89 +14,89 @@ uint8_t alarmHour, alarmMin, alarmSec; // Time for the Alarm
 
 void setup() {
   URTCLIB_WIRE.begin();
-  rtc.set(0, 30, 2, 7, 19, 11, 23);
+  rtc.set(0, 57, 12, 7, 22, 11, 23);
 
   lcd.begin(16, 2);
 }
 
 void loop() {
+  
   if (digitalRead(modeButton) == HIGH) {
-
-    uint8_t newHr = 0, newMin = 0, newSec = 0; // SetAlarm
+    delay(3000);
+    uint8_t newMonth = 1, newDay = 1, newYear = 0, newHr = 0, newMin = 0, newSec = 0; // SetAlarm
+    int mode = 1; // 1 represents hour, 2 represents minute, 3 represents second
 
     lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("New Time: ");
+    displayTime(newMonth, newDay, newYear, newHr, newMin, newSec);
+    
+    // if (digitalRead(upButton) == HIGH) {
+    //   switch (mode) {
+    //     case 1:
+    //       // displayTime(rtc.hour(), rtc.);
+    //     case 2:
 
-    // lcd.setCursor(0, 1);
-    // if (newHr < 10) {
-    //   lcd.print(0);
-    //   lcd.print(newHr);
-    // } else {
-    //   lcd.print(newHr);
-    // }
-    // lcd.print(':');
+    //     case 3:
 
-    // if (newMin < 10) {
-    //   lcd.print(0);
-    //   lcd.print(newMin);
-    // } else {
-    //   lcd.print(newMin);
-    // }
-    // lcd.print(':');
+    //     default:
+    //       mode = 1;
+    //   }
+    // } else if (digitalRead(downButton) == HIGH) {
 
-    // if (newSec < 10) {
-    //   lcd.print(0);
-    //   lcd.print(newSec);
-    // } else {
-    //   lcd.print(newSec);
     // }
-    // delay(50000); // 10 seconds to change
-    // lcd.clear();
-    // digitalWrite(modeButton, LOW);
+
+    // // rtc.set(0, 57, 12, 7, 22, 11, 23);
+    // // lcd.clear();
   } else {
-    displayTime();
+    displayTime(rtc.month(), rtc.day(), rtc.year(), rtc.hour(), rtc.minute(), rtc.second());
     delay(1000);
   }
 }
 
-void displayTime() {
+void displayTime(uint8_t month, uint8_t day, uint8_t year, uint8_t hour, uint8_t minute, uint8_t second) {
   rtc.refresh();
 
   lcd.setCursor(0, 0);
   lcd.print("Date: ");
 
-  lcd.print(rtc.month());
+  if (month < 10) {
+    lcd.print(0);
+  }
+  lcd.print(month);
   lcd.print('/');
-  lcd.print(rtc.day());
+
+  if (day < 10) {
+    lcd.print(0);
+  }
+  lcd.print(day);
   lcd.print('/');
-  lcd.print(rtc.year());
+
+  if (year < 10) {
+    lcd.print(0);
+  }
+  lcd.print(year);
 
   lcd.setCursor(0, 1);
   lcd.print("Time: ");
 
-  if (rtc.hour() < 10) {
+  if (hour < 10) {
     lcd.print(0);
-    lcd.print(rtc.hour());
-  } else {
-    lcd.print(rtc.hour());
   }
+  lcd.print(hour);
+  
   lcd.print(':');
 
-  if (rtc.minute() < 10) {
+  if (minute < 10) {
     lcd.print(0);
-    lcd.print(rtc.minute());
-  } else {
-    lcd.print(rtc.minute());
   }
+  lcd.print(minute);
+  
   lcd.print(':');
 
-  if (rtc.second() < 10) {
+  if (second < 10) {
     lcd.print(0);
-    lcd.print(rtc.second());
-  } else {
-    lcd.print(rtc.second());
   }
+  lcd.print(second);
+  
 }
 
 // void setTime() {
