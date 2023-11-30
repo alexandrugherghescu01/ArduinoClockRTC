@@ -11,6 +11,14 @@ LiquidCrystal lcd(RSPin, EPin, d4, d5, d6, d7); // Initialize LCD
 uRTCLib rtc(0x68); // Initialize RTC
 
 uint8_t alarmHour, alarmMin, alarmSec; // Time for the Alarm
+int mode = 0; // modes: 0 (time), 1 (set time), 2 (set alarm)
+
+void setup() {
+  URTCLIB_WIRE.begin();
+  rtc.set(0, 45, 12, 4, 30, 11, 23);
+
+  lcd.begin(16, 2);
+}
 
 void displayTime(uint8_t month, uint8_t day, uint8_t year, uint8_t hour, uint8_t minute, uint8_t second) {
   rtc.refresh();
@@ -56,14 +64,7 @@ void displayTime(uint8_t month, uint8_t day, uint8_t year, uint8_t hour, uint8_t
     lcd.print(0);
   }
   lcd.print(second);
-  
-}
 
-void setup() {
-  URTCLIB_WIRE.begin();
-  rtc.set(0, 57, 12, 7, 22, 11, 23);
-
-  lcd.begin(16, 2);
 }
 
 void loop() {
@@ -78,55 +79,17 @@ void loop() {
     // In the following for loop, mode 1 represents month, 2 represents day, 
     // 3 represents year, 4 represents hour, 5 represents minute, 6 represents second
     // When you set time, you have 5 seconds to do so per "mode"
-    for (int mode = 1; mode <= 6; mode++) {
-      delay(5000);
-      if (digitalRead(upButton) == HIGH) {
-        switch (mode) {
-          case 1:
-            displayTime(newMonth+1, newDay, newYear, newHr, newMin, newSec);
-            break;
-          case 2:
-            displayTime(newMonth, newDay+1, newYear, newHr, newMin, newSec);
-            break;
-          case 3:
-            displayTime(newMonth, newDay, newYear+1, newHr, newMin, newSec);
-            break;
-          case 4:
-            displayTime(newMonth, newDay, newYear, newHr+1, newMin, newSec);
-            break;
-          case 5:
-            displayTime(newMonth, newDay, newYear, newHr, newMin+1, newSec);
-            break;
-          case 6:
-            displayTime(newMonth, newDay, newYear, newHr, newMin, newSec+1);
-            break;
-        }
-      } else if (digitalRead(downButton) == HIGH) {
-        switch (mode) {
-        case 1:
-          displayTime(newMonth-1, newDay, newYear, newHr, newMin, newSec);
-          break;
-        case 2:
-          displayTime(newMonth, newDay-1, newYear, newHr, newMin, newSec);
-          break;
-        case 3:
-          displayTime(newMonth, newDay, newYear-1, newHr, newMin, newSec);
-          break;
-        case 4:
-          displayTime(newMonth, newDay, newYear, newHr-1, newMin, newSec);
-          break;
-        case 5:
-          displayTime(newMonth, newDay, newYear, newHr, newMin-1, newSec);
-          break;
-        case 6:
-          displayTime(newMonth, newDay, newYear, newHr, newMin, newSec-1);
-          break;
-      }
-    }
+
+    delay(2000);
+    // if (digitalRead(upButton) == HIGH) {
+  
+      
+    // } else if (digitalRead(downButton) == HIGH) {
+      
+    // }
+    
     rtc.set(newSec, newMin, newHr, rtc.dayOfWeek(), newDay, newMonth, newYear);
-    displayTime(rtc.month(), rtc.day(), rtc.year(), rtc.hour(), rtc.minute(), rtc.second());
   } 
-  }
   else {
     displayTime(rtc.month(), rtc.day(), rtc.year(), rtc.hour(), rtc.minute(), rtc.second());
     delay(1000);
@@ -143,7 +106,9 @@ void loop() {
 //   int clickDown = digitalRead(downPin);
 //   if (clickUp == HIGH) {
 //     tempTimeHrs++;    
-//   } else if (clickDown == HIGH) {
+//   } 
+
+//    if (clickDown == HIGH) {
 //     tempTimeHrs--;
     
 //   }
@@ -171,45 +136,3 @@ void loop() {
 //   }
 // } 
 
-// void setAlarm() {
-//   // get input from user
-//   uint8_t tempTimeHrs = 0;
-//   uint8_t tempTimeMins = 0;
-  
-//   int clickUp = digitalRead(upPin);
-//   int clickDown = digitalRead(downPin);
-//   if (clickUp == HIGH) {
-//     tempTimeHrs++;    
-//   } else if (clickDown == HIGH) {
-//     tempTimeHrs--;
-    
-//   }
-
-//   if (tempTimeHrs >= 0) {
-//       tempTimeHrs = tempTimeHrs % 12 + 1;
-//   } else {
-//       tempTimeHrs = 12 + tempTimeHrs;
-//   }
-//   // display on LCD
-
-//   if (digitalRead(nextPin) == HIGH) {
-//     if (clickUp == HIGH) {
-//       tempTimeMins++;
-//     } else if (clickDown == HIGH) {
-//       tempTimeMins--;
-//     }
-
-//     if (tempTimeHrs >= 0) {
-//         tempTimeMins = tempTimeMins % 60;
-//     } else {
-//         tempTimeHrs = 60 + tempTimeHrs;
-//     }
-//   }
-//   alarmHour = tempTimeHrs;
-//   alarmMin = tempTimeMins;
-//   alarmSec = 0;
-// }
-
-// bool checkAlarm() {
-//   return (alarmHour == rtc.hour()) && (alarmMin == rtc.minute()) && (alarmSec = rtc.second());
-// }
