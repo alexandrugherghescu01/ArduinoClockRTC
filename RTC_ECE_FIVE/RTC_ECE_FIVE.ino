@@ -11,15 +11,16 @@ const int buzzerPin = 11; // buzzer pin
 LiquidCrystal lcd(RSPin, EPin, d4, d5, d6, d7); // Initialize LCD
 uRTCLib rtc(0x68); // Initialize RTC
 
-uint8_t date[] = {1, 1, 0, 0, 0, 0};
+uint8_t date[] = {1, 1, 0, 0, 0, 0}; // month, day, year, hour, min, sec
 
-uint8_t alarm[] = {1, 0, 0}; // Time for the Alarm in hr, min, sec
+uint8_t alarm[] = {0, 0, 0}; // Time for the Alarm in hr, min, sec
 int mode = 0; // modes: 1 (set time), 2 (set alarm)
+bool alarmOn = false;
 // clicking button increments mode
 
 void setup() {
   URTCLIB_WIRE.begin();
-  rtc.set(0, 00, 6, 4, 07, 12, 23);
+  rtc.set(0, 0, 6, 4, 7, 12, 23);
 
   lcd.begin(16, 2);
 }
@@ -68,78 +69,79 @@ void displayTime(uint8_t month, uint8_t day, uint8_t year, uint8_t hour, uint8_t
     lcd.print(0);
   }
   lcd.print(second);
-
 }
 
-void loop() {
-
-  if (rtc.hour() == alarm[0] && rtc.minute() == alarm[1] && rtc.second() == alarm[2]) {
-    playAlarm();
-  }
-
-  if (digitalRead(modeButton) == HIGH) {
-    mode++;
-    if (mode == 1) {
-      // default values
-      // date includes the new Month, day, year, hour, minute, and second, respectively
-
-      lcd.clear(); // clears LCD
-      displayTime(date[0], date[1], date[2], date[3], date[4], date[5]);
-
-      // In the following for loop, mode 0 represents month, 1 represents day, 
-      // 2 represents year, 3 represents hour, 4 represents minute, 5 represents second
-      // When you set time, you have 5 seconds to do so per "mode"
-      setTime();
-    } else if (mode == 2) {
-      setAlarmTime();
-    }
-    mode = 0;
-  } else {
-    displayTime(rtc.month(), rtc.day(), rtc.year(), rtc.hour(), rtc.minute(), rtc.second());
-    delay(1000);
+void resetTime() {
+  for (int i = 3; i < 6; i++) {
+    date[i] = 0;
   }
 }
 
 void setTime() {
+  lcd.setCursor(15, 1);
+  lcd.print("S"); // indicator for set time
   for (int i = 0; i < 6; i++) {
+    lcd.setCursor(15, 0);
+    lcd.print(i); // print the iteration to denote whether to set month, day, year, hr, min, sec, respectively
     delay(5000);
-    if (digitalRead(upButton) == HIGH) {
+    if (digitalRead(upButton) == HIGH) { // up button pressed
+      tone(buzzerPin,659.255); // tells you if successfully changed time
+      delay(500);
+      noTone(buzzerPin);
       date[i]++;
-      date[i] = checkTime(i, date[i]);
+      date[i] = checkTime(i, date[i]); // verify time for validity
       displayTime(date[0], date[1], date[2], date[3], date[4], date[5]); // display incremented time
-    } else if (digitalRead(downButton) == HIGH) {
+    } else if (digitalRead(downButton) == HIGH) { // down button pressed
+      tone(buzzerPin,587.33); // tells you if successfully changed time
+      delay(500);
+      noTone(buzzerPin);
       date[i]--;
       date[i] = checkTime(i, date[i]);
       displayTime(date[0], date[1], date[2], date[3], date[4], date[5]); // display decremented time
     }
   }
-  rtc.set(date[0], date[1], date[2], rtc.dayOfWeek(), date[3], date[4], date[5]);
-  resetDate();
-}
+  rtc.set(date[5], date[4], date[3], rtc.dayOfWeek(), date[1], date[0], date[2]); // order: sec, min, hr, dayOfWeek, day, month, year
+  lcd.setCursor(15, 0);
+  lcd.print(" ");
 
-void resetDate() {
-  for (int i = 0; i < 6; i++) {
-    if (i == 1 || i == 2) {
-      date[i] = 1;
-    } else {
-      date[i] = 0;
-    }
-  }
+  lcd.setCursor(15, 1);
+  lcd.print(" ");
 }
 
 void setAlarmTime() {
+  lcd.setCursor(15, 1);
+  lcd.print("A"); // indicator for set alarm
   for (int i = 0; i < 3; i++) {
+    lcd.setCursor(15, 0);
+    lcd.print(i);
     delay(5000);
     if (digitalRead(upButton) == HIGH) {
+      tone(buzzerPin,659.255); // tells you if successfully changed time
+      delay(500);
+      noTone(buzzerPin);
       alarm[i]++;
-      alarm[i] = checkTime(i, alarm[i]);
+      alarm[i] = checkTime(i+3, alarm[i]);
       displayTime(rtc.month(), rtc.day(), rtc.year(), alarm[0], alarm[1], alarm[2]);
     } else if (digitalRead(downButton) == HIGH) {
+      tone(buzzerPin,587.33);
+      delay(500);
+      noTone(buzzerPin);
       alarm[i]--;
-      alarm[i] = checkTime(i, alarm[i]);
+      alarm[i] = checkTime(i+3, alarm[i]); // tells you if successfully changed time
+      displayTime(rtc.month(), rtc.day(), rtc.year(), alarm[0], alarm[1], alarm[2]);
     }
-		resetDate();
   }
+  lcd.setCursor(15, 0);
+  lcd.print("D"); // alarm time indicator
+
+
+  displayTime(rtc.month(), rtc.day(), rtc.year(), alarm[0], alarm[1], alarm[2]);
+
+  lcd.setCursor(15, 0);
+  lcd.print(" ");
+
+  lcd.setCursor(15, 1);
+  lcd.print(" ");
 }
 
 // check if time input is valid
@@ -287,3 +289,38 @@ void playAlarm() {
     delay(1000);
 }
 
+void loop() {
+  if (digitalRead(modeButton) == HIGH) {
+    mode++;
+    if (mode == 1) {
+      // date includes the new Month, day, year, hour, minute, and second, respectively
+
+      lcd.clear(); // clears LCD
+      displayTime(date[0], date[1], date[2], date[3], date[4], date[5]);
+
+      // In the following for loop, mode 0 represents month, 1 represents day, 
+      // 2 represents year, 3 represents hour, 4 represents minute, 5 represents second
+      // When you set time, you have 5 seconds to do so per "mode"
+      setTime();
+    } else if (mode == 2) {
+      lcd.clear();
+      displayTime(date[0], date[1], date[2], alarm[0], alarm[1], alarm[2]);
+      setAlarmTime();
+      mode = 0;
+    }
+  } else {
+    displayTime(rtc.month(), rtc.day(), rtc.year(), rtc.hour(), rtc.minute(), rtc.second());
+    delay(1000);
+  }
+
+    if (rtc.hour() == alarm[0] && rtc.minute() == alarm[1] && rtc.second() == alarm[2]) {
+      alarmOn = true;
+      while (alarmOn) {
+        playAlarm();
+        if (digitalRead(modeButton) == HIGH) {
+          alarmOn = false;
+          mode = 0;
+        }
+      }
+  }
+}
