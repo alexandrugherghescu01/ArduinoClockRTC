@@ -14,7 +14,7 @@ uRTCLib rtc(0x68); // Initialize RTC
 
 uint8_t date[] = {1, 1, 0, 0, 0, 0};
 
-uint8_t alarmHour, alarmMin, alarmSec; // Time for the Alarm
+uint8_t alarm[] = {1, 0, 0}; // Time for the Alarm in hr, min, sec
 int mode = 0; // modes: 1 (set time), 2 (set alarm)
 // clicking button increments mode
 
@@ -74,7 +74,7 @@ void displayTime(uint8_t month, uint8_t day, uint8_t year, uint8_t hour, uint8_t
 
 void loop() {
 
-  if (rtc.alarmTriggered(alarm)) {
+  if (rtc.hour() == alarm[0] && rtc.minute() == alarm[1] && rtc.second() == alarm[2]) {
     playAlarm();
   }
 
@@ -91,7 +91,7 @@ void loop() {
       // 2 represents year, 3 represents hour, 4 represents minute, 5 represents second
       // When you set time, you have 5 seconds to do so per "mode"
       setTime();
-    } else {
+    } else if (mode == 2) {
       setAlarmTime();
     }
     mode = 0;
@@ -129,18 +129,20 @@ void resetDate() {
 }
 
 void setAlarmTime() {
-  for (int i = 3; i < 6; i++) {
+  for (int i = 0; i < 3; i++) {
     delay(5000);
     if (digitalRead(upButton) == HIGH) {
-      date[i]++;
-      date[i] = checkTime(i, date[i]);
-      displayTime(rtc.month(), rtc.day(), rtc.year(), date[3], date[4], date[5]);
+      alarm[i]++;
+      alarm[i] = checkTime(i, alarm[i]);
+      displayTime(rtc.month(), rtc.day(), rtc.year(), alarm[0], alarm[1], alarm[2]);
     } else if (digitalRead(downButton) == HIGH) {
-      date[i]--;
-      date[i] = checkTime(i, date[i]);
+      alarm[i]--;
+      alarm[i] = checkTime(i, alarm[i]);
     }
-    rtc.alarmSet(URTCLIB_ALARM_TYPE_1_NONE, date[5], date[4], date[3], rtc.dayOfWeek());
-    resetDate();
+	 	alarmHour = alarm[0];
+		alarmMin = alarm[1];
+		alarmSec = alarm[2]; 
+		resetDate();
   }
 }
 
