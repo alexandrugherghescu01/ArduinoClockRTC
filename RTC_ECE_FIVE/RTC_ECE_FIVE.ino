@@ -7,7 +7,6 @@
 const int RSPin = 1, EPin = 2, d4 = 4, d5 = 5, d6 = 6, d7 = 7; // LCD pins
 const int modeButton = 8, upButton = 9, downButton = 10; // button pins
 const int buzzerPin = 11; // buzzer pin
-const uint8_t alarm = URTCLIB_ALARM_1;
 
 LiquidCrystal lcd(RSPin, EPin, d4, d5, d6, d7); // Initialize LCD
 uRTCLib rtc(0x68); // Initialize RTC
@@ -20,7 +19,7 @@ int mode = 0; // modes: 1 (set time), 2 (set alarm)
 
 void setup() {
   URTCLIB_WIRE.begin();
-  rtc.set(0, 45, 12, 4, 30, 11, 23);
+  rtc.set(0, 00, 6, 4, 07, 12, 23);
 
   lcd.begin(16, 2);
 }
@@ -139,9 +138,6 @@ void setAlarmTime() {
       alarm[i]--;
       alarm[i] = checkTime(i, alarm[i]);
     }
-	 	alarmHour = alarm[0];
-		alarmMin = alarm[1];
-		alarmSec = alarm[2]; 
 		resetDate();
   }
 }
